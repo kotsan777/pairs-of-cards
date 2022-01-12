@@ -6,32 +6,41 @@
 import UIKit
 
 protocol GameProtocol {
-    func generateCards()
+    var cards: [Card] {get set}
+    init(cardPairs: Int)
+    func refreshGame()
     func checkCards(_ firstCard: Card, _ secondCard: Card) -> Bool
 }
 
 class Game: GameProtocol {
-    // кол-во уникальных пар карточек
-    var cardsCount = 0
-    // массив сгенерированных карточек
-    var cards = [Card]()
+
+    lazy var cards: [Card] = []
     
-    // Генерация массива случайных карт
-    func generateCards() {
+    private var cardsCount: Int = 0
+
+    private var newCards: [Card] {
         var cards = [Card]()
-        for _ in 0...cardsCount {
-            let randomElement = (type: CardType.allCases.randomElement()!, color: CardColor.allCases.randomElement()!)
-            cards.append(randomElement)
+        for _ in 1...cardsCount {
+            guard let cardType = CardType.allCases.randomElement(), let cardColor = CardColor.allCases.randomElement() else {
+                return cards
+            }
+            let randomCard = (type: cardType, color: cardColor)
+            cards.append(randomCard)
         }
-        self.cards = cards
+        return cards
     }
-    
-    // ПРоверка эквивалентности карточек
+
+    required init(cardPairs: Int) {
+        cardsCount = cardPairs
+        cards = newCards
+    }
+
+    func refreshGame() {
+        cards.removeAll()
+        cards = newCards
+    }
+
     func checkCards(_ firstCard: Card, _ secondCard: Card) -> Bool {
-        if firstCard == secondCard {
-            return true
-        } else {
-            return false
-        }
+        firstCard == secondCard ? true : false
     }
 }

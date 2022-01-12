@@ -6,186 +6,182 @@
 //
 
 import UIKit
+protocol BoardGameControllerProtocol: UIViewController {
+    var game: GameProtocol {get set}
+    var startButton: StartButtonProtocol {get set}
+    var boardGameView: BoardGameViewProtocol {get set}
+    var cardViewFactory: CardViewFactoryProtocol {get set}
+    var boardGameConstructor: BoardGameConstructorProtocol {get set}
+    var flippedCards: [FlippableView] {get set}
+    var cardViews: [FlippableView] {get set}
+    init(boardGameConstructor: BoardGameConstructorProtocol)
+    func removeCardsFromView(fromViewController viewController: BoardGameControllerProtocol)
+    func flipCards(viewController: BoardGameControllerProtocol)
+    func checkCards(viewController: BoardGameControllerProtocol) -> Bool
+}
 
-class BoardGameController: UIViewController {
-    
-    // MARK: LifeCycle
+class BoardGameController: UIViewController, BoardGameControllerProtocol{
+
+    enum Constants: Float {
+        case boardMargin = 10
+        case removeViewDuration = 0.3
+    }
+
+    var boardGameConstructor: BoardGameConstructorProtocol
+    var game: GameProtocol
+    var cardViewFactory: CardViewFactoryProtocol
+    var boardGameView: BoardGameViewProtocol
+    var startButton: StartButtonProtocol
+    var cardViews = [FlippableView]()
+    lazy var flippedCards = [FlippableView]()
+
+    private lazy var cardSize = cardViewFactory.cardSize
+    private lazy var cardMaxXCoordinate = Int(boardGameView.frame.width - cardSize.width)
+    private lazy var cardMaxYCoordinate = Int(boardGameView.frame.height - cardSize.height)
+
+    required init(boardGameConstructor: BoardGameConstructorProtocol) {
+        self.boardGameConstructor = boardGameConstructor
+        game = boardGameConstructor.game
+        cardViewFactory = boardGameConstructor.cardViewFactory
+        boardGameView = boardGameConstructor.boardGameView
+        startButton = boardGameConstructor.startButton
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(startButtonView)
+        view.addSubview(startButton)
         view.addSubview(boardGameView)
+        setupButtonConstraints(button:startButton)
+        setupBoardConstraints(board:boardGameView, button: startButton)
+        addTargetForButton(button: startButton, selector: #selector(startGame(_:)))
     }
-    
-    // экшн метод
+
     @objc func startGame(_ sender: UIButton) {
-        print("button was pressed")
-        game = getNewGame()
+        game.refreshGame()
         let cards = getCardsBy(modelData: game.cards)
         placeCardsOnBoard(cards)
     }
 
-    
-    // кол-во уникальных пар карточек
-    var cardsPairsCounts = 8
-    // сущность игра
-    lazy var game = getNewGame()
-    
-    private func getNewGame() -> Game {
-        let game = Game()
-        game.cardsCount = self.cardsPairsCounts
-        game.generateCards()
-        return game
+    func removeCardsFromView(fromViewController viewController: BoardGameControllerProtocol) {
+        guard let firstCard = viewController.flippedCards.first, let secondCard = viewController.flippedCards.last else {
+            return
+        }
+        let duration = TimeInterval(Constants.removeViewDuration.rawValue)
+        let animation = { firstCard.layer.opacity = 0; secondCard.layer.opacity = 0 }
+        UIView.animate(withDuration: duration, animations: animation) { _ in
+            firstCard.removeFromSuperview()
+            secondCard.removeFromSuperview()
+            viewController.flippedCards.removeAll()
+        }
     }
-    
-    // MARK: Кнопка для запуска/перезапуска игры
-    lazy var startButtonView = getStartButtonView()
-    
-    private func getStartButtonView() -> UIButton {
-        // Создаем кнопку
-        let button = UIButton.init(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
-        
-        // Получаем доступ к текущему окну
-        let window = UIApplication.shared.windows[0]
-        window.overrideUserInterfaceStyle = .light
-        
-        // Определяем отступ сверху от границ окна до safeArea
-        let topPadding = window.safeAreaInsets.top
-        
-        // Изменяем положение кнопки
-        button.center.x = view.center.x
-        button.frame.origin.y = topPadding
-        
-        // Устанавливаем текст
-        button.setTitle("Начать игру", for: .normal)
-        
-        // Цвет текста для обычного состояния
-        button.setTitleColor(.black, for: .normal)
-        
-        // Цвет текста для нажатого состояния
-        button.setTitleColor(.gray, for: .highlighted)
-        
-        // Фоновый цвет кнопки
-        button.backgroundColor = .systemGray4
-        
-        // Скругляем углы
-        button.layer.cornerRadius = 10
-        
-        // подключаем обработчик нажатия на кнопку
-        button.addTarget(nil, action: #selector(startGame(_:)), for: .touchUpInside)
 
-        return button
+    func flipCards(viewController: BoardGameControllerProtocol) {
+        viewController.flippedCards.forEach { $0.flip() }
     }
-    
-    // MARK: Игровое поле
-    lazy var boardGameView = getBoardGameView()
-    
-    private func getBoardGameView() -> UIView {
-        // отступ игрового поля от ближайших элементов
-        let margin: CGFloat = 10
-        let boardView = UIView()
-        
-        // указываем координаты x и y
-        boardView.frame.origin.x = margin
-        let window = UIApplication.shared.windows[0]
-        let topPadding = window.safeAreaInsets.top
-        boardView.frame.origin.y = topPadding + startButtonView.frame.height + margin
-        
-        // Расчитываем ширину
-        boardView.frame.size.width = UIScreen.main.bounds.width - margin * 2
-        
-        // Расчитываем высоту
-        let bottomPadding = window.safeAreaInsets.bottom
-        boardView.frame.size.height = UIScreen.main.bounds.height - boardView.frame.origin.y - margin - bottomPadding
-        
-        // Изменяем стиль игрового поля
-        boardView.layer.cornerRadius = 5
-        boardView.layer.backgroundColor = #colorLiteral(red: 0.721568644, green: 0.8862745166, blue: 0.5921568871, alpha: 1)
-        
-        return boardView
+
+    func checkCards(viewController: BoardGameControllerProtocol) -> Bool {
+        guard let firstCardTag = viewController.flippedCards.first?.tag,
+              let secondCardTag = viewController.flippedCards.last?.tag else {
+                  return false
+              }
+        let firstCard = viewController.game.cards[firstCardTag]
+        let secondCard = viewController.game.cards[secondCardTag]
+        return firstCard == secondCard
     }
-    
-    // MARK: Размер и расположение карточек
-    private var cardSize = CGSize(width: 80, height: 120)
-    
-    private var cardMaxXCoordinate: Int {
-        Int(boardGameView.frame.width - cardSize.width)
-    }
-    
-    private var cardMaxYCoordinate: Int {
-        Int(boardGameView.frame.height - cardSize.height)
-    }
-    
-    
-    // MARK: Генерация массива карточек на основе данных Модели
-    private func getCardsBy(modelData: [Card]) -> [UIView] {
-        var cardViews = [UIView]()
-        let cardViewFactory = CardViewFactory()
-        
-        for(index,cardModel) in modelData.enumerated() {
-            let cardOne = cardViewFactory.get(cardModel.type, withSize: cardSize, andColor: cardModel.color)
-            cardOne.tag = index
-            cardViews.append(cardOne)
-            
-            let cardTwo = cardViewFactory.get(cardModel.type, withSize: cardSize, andColor: cardModel.color)
-            cardTwo.tag = index
-            cardViews.append(cardTwo)
+
+    func updateCardViews(viewController: BoardGameControllerProtocol) {
+        let isSameCards = viewController.checkCards(viewController: viewController)
+        if isSameCards {
+            viewController.removeCardsFromView(fromViewController: viewController)
+        } else {
+            viewController.flipCards(viewController: viewController)
         }
-        
-        // добавляем всем картам обработчик переворота
-        
-        for card in cardViews {
-            (card as! FlippableView).flipCompletionHandler = { [self] flippedCard in
-                flippedCard.superview?.bringSubviewToFront(flippedCard)
-                if flippedCard.isFlipped {
-                    self.flippedCards.append(flippedCard)
-                } else {
-                    if let cardIndex = self.flippedCards.firstIndex(of: flippedCard) {
-                        self.flippedCards.remove(at: cardIndex)
-                    }
-                }
-                
-                if self.flippedCards.count == 2 {
-                    let firstCard = game.cards[self.flippedCards.first!.tag]
-                    let secondCard = game.cards[self.flippedCards.last!.tag]
-                    
-                    if game.checkCards(firstCard, secondCard) {
-                        //анимировано скрываем карточки
-                        UIView.animate(withDuration: 0.3, animations: {
-                            self.flippedCards.first!.layer.opacity = 0
-                            self.flippedCards.last!.layer.opacity = 0
-                        }, completion: { _ in
-                            self.flippedCards.first?.removeFromSuperview()
-                            self.flippedCards.last?.removeFromSuperview()
-                            self.flippedCards = []
-                        })
-                    } else {
-                        for card in self.flippedCards {
-                            (card as! FlippableView).flip()
-                        }
-                    }
-                }
-            }
-        }
-        return cardViews
     }
-    
-    // массив перевернутых карточек
-    private var flippedCards = [UIView]()
-    
-    var cardViews = [UIView]()
-    
-    private func placeCardsOnBoard(_ cards: [UIView]) {
-        // удаляем все карточки с поля
-        for card in cardViews {
-            card.removeFromSuperview()
-        }
+
+    private func placeCardsOnBoard(_ cards: [FlippableView]) {
+        cardViews.forEach { $0.removeFromSuperview() }
         cardViews = cards
-        // перебираем карточки
-        for card in cardViews {
+        cardViews.forEach { card in
             let randomXCoordinate = Int.random(in: 0...cardMaxXCoordinate)
             let randomYCoordinate = Int.random(in: 0...cardMaxYCoordinate)
             card.frame.origin = CGPoint(x: randomXCoordinate, y: randomYCoordinate)
             boardGameView.addSubview(card)
         }
+    }
+
+    private func getCardsBy(modelData: [Card]) -> [FlippableView] {
+        var cardViews = [FlippableView]()
+        modelData.enumerated().forEach { index, cardModel in
+            let cardOne = cardViewFactory.get(cardModel.type, andColor: cardModel.color)
+            let cardTwo = cardViewFactory.get(cardModel.type, andColor: cardModel.color)
+            cardOne.tag = index
+            cardTwo.tag = index
+            cardViews.append(cardOne)
+            cardViews.append(cardTwo)
+        }
+        cardViews.forEach { setupCompletionHandler(forCardView: $0) }
+        return cardViews
+    }
+
+    private func setupCompletionHandler(forCardView card: FlippableView) {
+        card.flipCompletionHandler = { [weak self] flippedCard in
+            guard let strongSelf = self, let cardSuperView = flippedCard.superview else {
+                return
+            }
+            cardSuperView.bringSubviewToFront(flippedCard)
+            if flippedCard.isFlipped {
+                strongSelf.addCardToFlippedCards(toViewController: strongSelf, card: flippedCard)
+            } else {
+                strongSelf.removeCardFromFlippedCards(fromViewController: strongSelf, card: flippedCard)
+            }
+            if strongSelf.flippedCards.count == 2 {
+                strongSelf.updateCardViews(viewController: strongSelf)
+            }
+        }
+    }
+
+    private func addCardToFlippedCards(toViewController viewController: BoardGameControllerProtocol, card: FlippableView) {
+        viewController.flippedCards.append(card)
+    }
+
+    private func removeCardFromFlippedCards(fromViewController viewController: BoardGameControllerProtocol, card: UIView) {
+        let flippedCards = viewController.flippedCards as [UIView]
+        let cardForRemove = card as UIView
+        guard let cardIndex = flippedCards.firstIndex(of: cardForRemove) else {
+            return
+        }
+        viewController.flippedCards.remove(at: cardIndex)
+    }
+
+    private func setupButtonConstraints(button: UIButton) {
+        guard let safeArea = UIApplication.shared.windows.first?.safeAreaInsets else {
+            return
+        }
+        let topPadding = safeArea.top
+        let topConstraint = button.topAnchor.constraint(equalTo: view.topAnchor, constant: topPadding)
+        let horizontalConstraint = button.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        view.addConstraints([topConstraint,horizontalConstraint])
+    }
+
+    private func setupBoardConstraints(board: UIView, button: UIView) {
+        guard let safeArea = UIApplication.shared.windows.first?.safeAreaInsets else {
+            return
+        }
+        let bottomPadding = safeArea.bottom
+        let margin = CGFloat(Constants.boardMargin.rawValue)
+        let leadingConstraint = board.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: margin)
+        let trailingConstraint = board.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -margin)
+        let topConstraint = board.topAnchor.constraint(equalTo: button.bottomAnchor, constant: margin)
+        let bottomConstraint = board.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -bottomPadding)
+        view.addConstraints([leadingConstraint,trailingConstraint,topConstraint,bottomConstraint])
+    }
+
+    private func addTargetForButton(button: UIButton, selector: Selector) {
+        button.addTarget(nil, action: selector, for: .touchUpInside)
     }
 }

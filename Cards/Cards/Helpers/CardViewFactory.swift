@@ -5,29 +5,34 @@
 import UIKit
 
 protocol CardViewFactoryProtocol {
-    func get(_ shape: CardType, withSize size: CGSize, andColor color: CardColor) -> UIView
-    func getViewColorBy(modelColor: CardColor) -> UIColor
+    var cardSize: CGSize {get set}
+    func get(_ shape: CardType, andColor color: CardColor) -> FlippableView
 }
 
 class CardViewFactory: CardViewFactoryProtocol {
-    func get(_ shape: CardType, withSize size: CGSize, andColor color: CardColor) -> UIView {
-        let frame = CGRect(origin: .zero, size: size)
-        
+
+    var cardSize: CGSize
+
+    init(cardSize: CGSize) {
+        self.cardSize = cardSize
+    }
+
+    func get(_ shape: CardType, andColor color: CardColor) -> FlippableView {
+        let frame = CGRect(origin: .zero, size: cardSize)
         let viewColor = getViewColorBy(modelColor: color)
-        
         switch shape {
         case .circle:
-            return CardView<CircleShape>.init(frame: frame, color: viewColor)
+            return CardView<CircleShape>(frame: frame, color: viewColor)
         case .cross:
-            return CardView<CrossShape>.init(frame: frame, color: viewColor)
+            return CardView<CrossShape>(frame: frame, color: viewColor)
         case .square:
-            return CardView<SquareShape>.init(frame: frame, color: viewColor)
+            return CardView<SquareShape>(frame: frame, color: viewColor)
         case .fill:
-            return CardView<FIllShape>.init(frame: frame, color: viewColor)
+            return CardView<FIllShape>(frame: frame, color: viewColor)
         }
     }
     
-    func getViewColorBy(modelColor: CardColor) -> UIColor {
+    private func getViewColorBy(modelColor: CardColor) -> UIColor {
         switch modelColor {
         case .red:
             return .red
@@ -47,6 +52,4 @@ class CardViewFactory: CardViewFactoryProtocol {
             return .orange
         }
     }
-    
-    
 }
