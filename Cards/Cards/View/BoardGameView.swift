@@ -13,7 +13,7 @@ protocol BoardGameViewProtocol: UIView {
 
 class BoardGameView: UIView, BoardGameViewProtocol{
 
-    enum Constants: CGFloat {
+    private enum Constants: CGFloat {
         case boardMargin = 10
         case boardCornerRadius = 30
     }

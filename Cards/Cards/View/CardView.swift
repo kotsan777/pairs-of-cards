@@ -12,14 +12,14 @@ protocol FlippableView: UIView {
 
 class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
 
-    enum Constants: CGFloat {
+    private enum Constants: CGFloat {
         case cornerRadius = 20
         case margin = 10
         case animatingDuration = 0.5
         case borderWidth = 2
     }
 
-    enum BackSideViewStates: CaseIterable {
+    private enum BackSideViewStates: CaseIterable {
         case circle
         case line
     }

@@ -22,7 +22,7 @@ protocol BoardGameControllerProtocol: UIViewController {
 
 class BoardGameController: UIViewController, BoardGameControllerProtocol{
 
-    enum Constants: Float {
+    private enum Constants: Float {
         case boardMargin = 10
         case removeViewDuration = 0.3
     }

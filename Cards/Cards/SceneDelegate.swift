@@ -17,7 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             return
         }
         let game = Game(cardPairs: 3)
-        let cardViewFactory = CardViewFactory(cardSize: CGSize(width: 70, height: 140))
+        let cardViewFactory = CardViewFactory(cardSize: CGSize(width: 80, height: 130))
         let boardGameView = BoardGameView()
         let startButtonView = StartButton()
         let boardGameConstructor = BoardGameConstructor(game: game, cardViewFactory: cardViewFactory, boardGameView: boardGameView, startButton: startButtonView)

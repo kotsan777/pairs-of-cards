@@ -14,7 +14,7 @@ protocol StartButtonProtocol: UIButton {
 
 class StartButton: UIButton, StartButtonProtocol {
 
-    enum Constants: CGFloat {
+    private enum Constants: CGFloat {
         case buttonWidth = 200
         case buttonHeight = 50
         case buttonCornerRadius = 15
@@ -23,9 +23,9 @@ class StartButton: UIButton, StartButtonProtocol {
     private let defaultTitle = "StartGame"
     private let defaultColor = UIColor.black
     private let defaultBackgroundColor = UIColor.systemGray4
-    private var defaultWidth = Constants.buttonWidth.rawValue
-    private var defaultHeight = Constants.buttonHeight.rawValue
-    private var defaultCornerRadius = Constants.buttonCornerRadius.rawValue
+    private let defaultWidth = Constants.buttonWidth.rawValue
+    private let defaultHeight = Constants.buttonHeight.rawValue
+    private let defaultCornerRadius = Constants.buttonCornerRadius.rawValue
 
     required init() {
         super.init(frame: CGRect())
