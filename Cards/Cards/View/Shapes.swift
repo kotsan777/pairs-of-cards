@@ -1,4 +1,3 @@
-//
 //  Shapes.swift
 //  Cards
 
@@ -17,10 +16,10 @@ extension ShapeLayerProtocol {
 // MARK: Frontside of Card (Circle)
 class CircleShape: CAShapeLayer, ShapeLayerProtocol {
 
-    private enum Constants: CGFloat {
-        case half = 0.5
-        case startAngle = 0
-        case endAngle = 6.3
+    private enum Constants {
+        static let half: CGFloat = 0.5
+        static let startAngle: CGFloat = 0
+        static let endAngle: CGFloat = 6.3
     }
     
     required init(size: CGSize, fillColor: CGColor) {
@@ -28,12 +27,12 @@ class CircleShape: CAShapeLayer, ShapeLayerProtocol {
         guard let smallSideSize = [size.width, size.height].min() else {
             return
         }
-        let centerX = size.width * Constants.half.rawValue
-        let centerY = size.height * Constants.half.rawValue
+        let centerX = size.width * Constants.half
+        let centerY = size.height * Constants.half
         let center = CGPoint(x: centerX, y: centerY)
-        let startAngle = Constants.startAngle.rawValue
-        let endAngle = Constants.endAngle.rawValue
-        let radius = smallSideSize * Constants.half.rawValue
+        let startAngle = Constants.startAngle
+        let endAngle = Constants.endAngle
+        let radius = smallSideSize * Constants.half
         let path = UIBezierPath(arcCenter: center, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: true)
         path.close()
         self.path = path.cgPath
@@ -49,8 +48,8 @@ class CircleShape: CAShapeLayer, ShapeLayerProtocol {
 // MARK: Frontside of Card (Square)
 class SquareShape: CAShapeLayer, ShapeLayerProtocol {
 
-    private enum Constants: CGFloat {
-        case xPoint = 0
+    private enum Constants {
+        static let xPoint: CGFloat = 0
     }
 
     required init(size: CGSize, fillColor: CGColor) {
@@ -61,7 +60,7 @@ class SquareShape: CAShapeLayer, ShapeLayerProtocol {
         let halfHeightOfCard = size.height / 2
         let halfheightOfSquare = smallSideSize / 2
         let yPoint = halfHeightOfCard - halfheightOfSquare
-        let xPoint = Constants.xPoint.rawValue
+        let xPoint = Constants.xPoint
         let rect = CGRect(x: xPoint, y: yPoint, width: smallSideSize, height: smallSideSize)
         let path = UIBezierPath(rect: rect)
         path.close()
@@ -76,8 +75,9 @@ class SquareShape: CAShapeLayer, ShapeLayerProtocol {
 
 // MARK: Frontside of Card (Cross)
 class CrossShape: CAShapeLayer, ShapeLayerProtocol {
-    private enum Constants: CGFloat {
-        case lineWidth = 5
+
+    private enum Constants {
+        static let lineWidth: CGFloat = 5
     }
 
     required init(size: CGSize, fillColor: CGColor) {
@@ -93,7 +93,7 @@ class CrossShape: CAShapeLayer, ShapeLayerProtocol {
         path.addLine(to: rightTopPoint)
         self.path = path.cgPath
         self.strokeColor = fillColor
-        self.lineWidth = Constants.lineWidth.rawValue
+        self.lineWidth = Constants.lineWidth
     }
     
     required init?(coder: NSCoder) {
@@ -120,23 +120,23 @@ class FIllShape: CAShapeLayer, ShapeLayerProtocol {
 // MARK: Backside of Card (Circles)
 class BackSideCircle: CAShapeLayer, ShapeLayerProtocol {
 
-    private enum Constants: CGFloat {
-        case countOfCircles = 15
-        case minRadiusCircle = 5
-        case maxRadiusCircle = 20
-        case startAngle = 0
-        case endAngle = 6.3
+    private enum Constants {
+        static let countOfCircles = 15
+        static let minRadiusCircle = 5
+        static let maxRadiusCircle = 20
+        static let startAngle: CGFloat = 0
+        static let endAngle: CGFloat = 6.3
     }
 
     required init(size: CGSize, fillColor: CGColor) {
         super.init()
         let maxXPoint = Int(size.width)
         let maxYPoint = Int(size.height)
-        let minRadiusCircle = Int(Constants.minRadiusCircle.rawValue)
-        let maxRadiusCircle = Int(Constants.maxRadiusCircle.rawValue)
-        let countOfCircle = Int(Constants.countOfCircles.rawValue)
-        let startAngle = Constants.startAngle.rawValue
-        let endAngle = Constants.endAngle.rawValue
+        let minRadiusCircle = Constants.minRadiusCircle
+        let maxRadiusCircle = Constants.maxRadiusCircle
+        let countOfCircle = Constants.countOfCircles
+        let startAngle = Constants.startAngle
+        let endAngle = Constants.endAngle
         let path = UIBezierPath()
         for _ in 1...countOfCircle {
             let randomX = Int.random(in: 0...maxXPoint)
@@ -158,15 +158,15 @@ class BackSideCircle: CAShapeLayer, ShapeLayerProtocol {
 // MARK: Backside of Card (Lines)
 class BackSideLine: CAShapeLayer, ShapeLayerProtocol {
 
-    private enum Constants: CGFloat {
-        case countLines = 15
-        case lineWidth = 3
+    private enum Constants {
+        static let countLines = 15
+        static let lineWidth: CGFloat = 3
     }
 
     required init(size: CGSize, fillColor: CGColor) {
         super.init()
-        let countLines = Int(Constants.countLines.rawValue)
-        let lineWidth = Constants.lineWidth.rawValue
+        let countLines = Constants.countLines
+        let lineWidth = Constants.lineWidth
         let maxXPoint = Int(size.width)
         let maxYPoint = Int(size.height)
         let path = UIBezierPath()

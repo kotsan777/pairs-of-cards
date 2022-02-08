@@ -10,14 +10,14 @@ protocol FlippableView: UIView {
     func flip()
 }
 
-class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
+private enum Constants {
+    static let cornerRadius: CGFloat = 20
+    static let margin: CGFloat = 10
+    static let animatingDuration: CGFloat = 0.5
+    static let borderWidth: CGFloat = 2
+}
 
-    private enum Constants: CGFloat {
-        case cornerRadius = 20
-        case margin = 10
-        case animatingDuration = 0.5
-        case borderWidth = 2
-    }
+class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
 
     private enum BackSideViewStates: CaseIterable {
         case circle
@@ -39,7 +39,7 @@ class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
         guard let color = color else {
             return view
         }
-        let margin = Constants.margin.rawValue
+        let margin = Constants.margin
         let width = bounds.width - margin * 2
         let height = bounds.height - margin * 2
         let origin = CGPoint(x: margin, y: margin)
@@ -51,7 +51,7 @@ class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
         shapeView.layer.addSublayer(shapeLayer)
         view.backgroundColor = . white
         view.layer.masksToBounds = true
-        view.layer.cornerRadius = Constants.cornerRadius.rawValue
+        view.layer.cornerRadius = Constants.cornerRadius
         return view
     }
 
@@ -72,7 +72,7 @@ class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
         }
         view.backgroundColor = .white
         view.layer.masksToBounds = true
-        view.layer.cornerRadius = Constants.cornerRadius.rawValue
+        view.layer.cornerRadius = Constants.cornerRadius
         return view
     }
 
@@ -130,19 +130,19 @@ class CardView<ShapeType: ShapeLayerProtocol>: UIView, FlippableView {
 
     private func setupBorders() {
         clipsToBounds = true
-        layer.cornerRadius = Constants.cornerRadius.rawValue
-        layer.borderWidth = Constants.borderWidth.rawValue
+        layer.cornerRadius = Constants.cornerRadius
+        layer.borderWidth = Constants.borderWidth
         layer.borderColor = UIColor.black.cgColor
     }
 
     private func flipAnimation(fromView: UIView, toView: UIView) {
-        let duration = Constants.animatingDuration.rawValue
+        let duration = Constants.animatingDuration
         let animationOption = UIView.AnimationOptions.transitionFlipFromTop
         UIView.transition(from: fromView, to: toView, duration: duration, options: animationOption) {[weak self] _ in
-            guard let strongSelf = self else {
+            guard let self = self else {
                 return
             }
-            strongSelf.flipCompletionHandler?(strongSelf)
+            self.flipCompletionHandler?(self)
         }
     }
 }

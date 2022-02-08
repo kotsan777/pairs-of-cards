@@ -6,10 +6,11 @@
 //
 
 import UIKit
+
 protocol BoardGameControllerProtocol: UIViewController {
     var game: GameProtocol {get set}
-    var startButton: StartButtonProtocol {get set}
-    var boardGameView: BoardGameViewProtocol {get set}
+    var startButton: StartButton {get set}
+    var boardGameView: BoardGameView {get set}
     var cardViewFactory: CardViewFactoryProtocol {get set}
     var boardGameConstructor: BoardGameConstructorProtocol {get set}
     var flippedCards: [FlippableView] {get set}
@@ -22,16 +23,16 @@ protocol BoardGameControllerProtocol: UIViewController {
 
 class BoardGameController: UIViewController, BoardGameControllerProtocol{
 
-    private enum Constants: Float {
-        case boardMargin = 10
-        case removeViewDuration = 0.3
+    private enum Constants {
+        static let boardMargin: CGFloat = 10
+        static let removeViewDuration: CGFloat = 0.3
     }
 
     var boardGameConstructor: BoardGameConstructorProtocol
     var game: GameProtocol
     var cardViewFactory: CardViewFactoryProtocol
-    var boardGameView: BoardGameViewProtocol
-    var startButton: StartButtonProtocol
+    var boardGameView: BoardGameView
+    var startButton: StartButton
     var cardViews = [FlippableView]()
     lazy var flippedCards = [FlippableView]()
 
@@ -71,7 +72,7 @@ class BoardGameController: UIViewController, BoardGameControllerProtocol{
         guard let firstCard = viewController.flippedCards.first, let secondCard = viewController.flippedCards.last else {
             return
         }
-        let duration = TimeInterval(Constants.removeViewDuration.rawValue)
+        let duration = Constants.removeViewDuration
         let animation = { firstCard.layer.opacity = 0; secondCard.layer.opacity = 0 }
         UIView.animate(withDuration: duration, animations: animation) { _ in
             firstCard.removeFromSuperview()
@@ -130,17 +131,17 @@ class BoardGameController: UIViewController, BoardGameControllerProtocol{
 
     private func setupCompletionHandler(forCardView card: FlippableView) {
         card.flipCompletionHandler = { [weak self] flippedCard in
-            guard let strongSelf = self, let cardSuperView = flippedCard.superview else {
+            guard let self = self, let cardSuperView = flippedCard.superview else {
                 return
             }
             cardSuperView.bringSubviewToFront(flippedCard)
             if flippedCard.isFlipped {
-                strongSelf.addCardToFlippedCards(toViewController: strongSelf, card: flippedCard)
+                self.addCardToFlippedCards(toViewController: self, card: flippedCard)
             } else {
-                strongSelf.removeCardFromFlippedCards(fromViewController: strongSelf, card: flippedCard)
+                self.removeCardFromFlippedCards(fromViewController: self, card: flippedCard)
             }
-            if strongSelf.flippedCards.count == 2 {
-                strongSelf.updateCardViews(viewController: strongSelf)
+            if self.flippedCards.count == 2 {
+                self.updateCardViews(viewController: self)
             }
         }
     }
@@ -173,7 +174,7 @@ class BoardGameController: UIViewController, BoardGameControllerProtocol{
             return
         }
         let bottomPadding = safeArea.bottom
-        let margin = CGFloat(Constants.boardMargin.rawValue)
+        let margin = Constants.boardMargin
         let leadingConstraint = board.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: margin)
         let trailingConstraint = board.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -margin)
         let topConstraint = board.topAnchor.constraint(equalTo: button.bottomAnchor, constant: margin)

@@ -5,6 +5,8 @@
 
 import UIKit
 
+typealias Card = (type: CardType, color: CardColor)
+
 enum CardType: CaseIterable {
     case circle
     case cross
@@ -22,5 +24,3 @@ enum CardColor: CaseIterable {
     case purple
     case orange
 }
-
-typealias Card = (type: CardType, color: CardColor)

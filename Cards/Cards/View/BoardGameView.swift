@@ -6,19 +6,14 @@
 //
 
 import UIKit
-protocol BoardGameViewProtocol: UIView {
-    init()
-    init(color: UIColor, cornerRadius: CGFloat)
-}
 
-class BoardGameView: UIView, BoardGameViewProtocol{
+class BoardGameView: UIView {
 
-    private enum Constants: CGFloat {
-        case boardMargin = 10
-        case boardCornerRadius = 30
+    private enum Constants {
+        static let boardCornerRadius: CGFloat = 30
     }
 
-    private var defaultCornerRadius: CGFloat = Constants.boardCornerRadius.rawValue
+    private var defaultCornerRadius: CGFloat = Constants.boardCornerRadius
     private var defaultBackgroundColor: UIColor = UIColor.systemPink
 
     required init() {

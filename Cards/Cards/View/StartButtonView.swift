@@ -7,25 +7,20 @@
 
 import UIKit
 
-protocol StartButtonProtocol: UIButton {
-    init()
-    init(width: CGFloat, height: CGFloat, cornerRadius: CGFloat)
-}
+class StartButton: UIButton {
 
-class StartButton: UIButton, StartButtonProtocol {
-
-    private enum Constants: CGFloat {
-        case buttonWidth = 200
-        case buttonHeight = 50
-        case buttonCornerRadius = 15
+    private enum Constants {
+        static let buttonWidth: CGFloat = 200
+        static let buttonHeight: CGFloat = 50
+        static let buttonCornerRadius: CGFloat = 15
     }
 
     private let defaultTitle = "StartGame"
     private let defaultColor = UIColor.black
     private let defaultBackgroundColor = UIColor.systemGray4
-    private let defaultWidth = Constants.buttonWidth.rawValue
-    private let defaultHeight = Constants.buttonHeight.rawValue
-    private let defaultCornerRadius = Constants.buttonCornerRadius.rawValue
+    private let defaultWidth = Constants.buttonWidth
+    private let defaultHeight = Constants.buttonHeight
+    private let defaultCornerRadius = Constants.buttonCornerRadius
 
     required init() {
         super.init(frame: CGRect())

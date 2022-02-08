@@ -10,18 +10,18 @@ import UIKit
 protocol BoardGameConstructorProtocol {
     var game: GameProtocol {get set}
     var cardViewFactory: CardViewFactoryProtocol {get set}
-    var boardGameView: BoardGameViewProtocol {get set}
-    var startButton: StartButtonProtocol {get set}
-    init(game: GameProtocol, cardViewFactory: CardViewFactoryProtocol, boardGameView: BoardGameViewProtocol, startButton: StartButtonProtocol)
+    var boardGameView: BoardGameView {get set}
+    var startButton: StartButton {get set}
+    init(game: GameProtocol, cardViewFactory: CardViewFactoryProtocol, boardGameView: BoardGameView, startButton: StartButton)
 }
 
 class BoardGameConstructor: BoardGameConstructorProtocol {
     var game: GameProtocol
     var cardViewFactory: CardViewFactoryProtocol
-    var boardGameView: BoardGameViewProtocol
-    var startButton: StartButtonProtocol
+    var boardGameView: BoardGameView
+    var startButton: StartButton
 
-    required init(game: GameProtocol, cardViewFactory: CardViewFactoryProtocol, boardGameView: BoardGameViewProtocol, startButton: StartButtonProtocol) {
+    required init(game: GameProtocol, cardViewFactory: CardViewFactoryProtocol, boardGameView: BoardGameView, startButton: StartButton) {
         self.game = game
         self.cardViewFactory = cardViewFactory
         self.boardGameView = boardGameView
