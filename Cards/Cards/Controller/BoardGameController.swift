@@ -7,35 +7,36 @@
 
 import UIKit
 
-protocol BoardGameControllerProtocol: UIViewController {
+protocol CardGamable: AnyObject {
     var game: GameProtocol {get set}
-    var startButton: StartButton {get set}
-    var boardGameView: BoardGameView {get set}
-    var cardViewFactory: CardViewFactoryProtocol {get set}
-    var boardGameConstructor: BoardGameConstructorProtocol {get set}
     var flippedCards: [FlippableView] {get set}
-    var cardViews: [FlippableView] {get set}
-    init(boardGameConstructor: BoardGameConstructorProtocol)
-    func removeCardsFromView(fromViewController viewController: BoardGameControllerProtocol)
-    func flipCards(viewController: BoardGameControllerProtocol)
-    func checkCards(viewController: BoardGameControllerProtocol) -> Bool
 }
 
-class BoardGameController: UIViewController, BoardGameControllerProtocol{
+protocol CardGameUpdatable: CardGamable {
+    func removeCardsFromView(fromViewController viewController: CardGamable)
+    func flipCards(viewController: CardGamable)
+    func checkCards(viewController: CardGamable) -> Bool
+}
+
+protocol BoardGameControllerProtocol: AnyObject {
+    init(boardGameConstructor: BoardGameConstructorProtocol)
+}
+
+class BoardGameController: UIViewController, CardGameUpdatable, BoardGameControllerProtocol{
 
     private enum Constants {
         static let boardMargin: CGFloat = 10
         static let removeViewDuration: CGFloat = 0.3
     }
 
-    var boardGameConstructor: BoardGameConstructorProtocol
     var game: GameProtocol
-    var cardViewFactory: CardViewFactoryProtocol
-    var boardGameView: BoardGameView
-    var startButton: StartButton
-    var cardViews = [FlippableView]()
     lazy var flippedCards = [FlippableView]()
 
+    private var cardViews = [FlippableView]()
+    private var startButton: StartButton
+    private var boardGameView: BoardGameView
+    private var cardViewFactory: CardViewFactoryProtocol
+    private var boardGameConstructor: BoardGameConstructorProtocol
     private lazy var cardSize = cardViewFactory.cardSize
     private lazy var cardMaxXCoordinate = Int(boardGameView.frame.width - cardSize.width)
     private lazy var cardMaxYCoordinate = Int(boardGameView.frame.height - cardSize.height)
@@ -68,7 +69,7 @@ class BoardGameController: UIViewController, BoardGameControllerProtocol{
         placeCardsOnBoard(cards)
     }
 
-    func removeCardsFromView(fromViewController viewController: BoardGameControllerProtocol) {
+    func removeCardsFromView(fromViewController viewController: CardGamable) {
         guard let firstCard = viewController.flippedCards.first, let secondCard = viewController.flippedCards.last else {
             return
         }
@@ -81,11 +82,11 @@ class BoardGameController: UIViewController, BoardGameControllerProtocol{
         }
     }
 
-    func flipCards(viewController: BoardGameControllerProtocol) {
+    func flipCards(viewController: CardGamable) {
         viewController.flippedCards.forEach { $0.flip() }
     }
 
-    func checkCards(viewController: BoardGameControllerProtocol) -> Bool {
+    func checkCards(viewController: CardGamable) -> Bool {
         guard let firstCardTag = viewController.flippedCards.first?.tag,
               let secondCardTag = viewController.flippedCards.last?.tag else {
                   return false
@@ -95,7 +96,7 @@ class BoardGameController: UIViewController, BoardGameControllerProtocol{
         return firstCard == secondCard
     }
 
-    func updateCardViews(viewController: BoardGameControllerProtocol) {
+    private func updateCardViews(viewController: CardGameUpdatable) {
         let isSameCards = viewController.checkCards(viewController: viewController)
         if isSameCards {
             viewController.removeCardsFromView(fromViewController: viewController)
@@ -146,11 +147,11 @@ class BoardGameController: UIViewController, BoardGameControllerProtocol{
         }
     }
 
-    private func addCardToFlippedCards(toViewController viewController: BoardGameControllerProtocol, card: FlippableView) {
+    private func addCardToFlippedCards(toViewController viewController: CardGamable, card: FlippableView) {
         viewController.flippedCards.append(card)
     }
 
-    private func removeCardFromFlippedCards(fromViewController viewController: BoardGameControllerProtocol, card: UIView) {
+    private func removeCardFromFlippedCards(fromViewController viewController: CardGamable, card: UIView) {
         let flippedCards = viewController.flippedCards as [UIView]
         let cardForRemove = card as UIView
         guard let cardIndex = flippedCards.firstIndex(of: cardForRemove) else {
